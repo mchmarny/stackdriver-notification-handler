@@ -77,25 +77,25 @@ To allow this account to perform the necessary functions we are going to grant i
 
 ```shell
 gcloud projects add-iam-policy-binding $PROJECT \
-    --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
-    --role roles/run.invoker
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/run.invoker
 
 # TODO: `pubsub.publisher` should be sufficient
 gcloud projects add-iam-policy-binding $PROJECT \
-    --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
-    --role roles/pubsub.editor
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/pubsub.editor
 
 gcloud projects add-iam-policy-binding $PROJECT \
-	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
-    --role roles/logging.logWriter
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/logging.logWriter
 
 gcloud projects add-iam-policy-binding $PROJECT \
-	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
-    --role roles/cloudtrace.agent
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/cloudtrace.agent
 
 gcloud projects add-iam-policy-binding $PROJECT \
-	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
-    --role roles/monitoring.metricWriter
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/monitoring.metricWriter
 ```
 
 ## Cloud Run Service
@@ -104,13 +104,13 @@ Create Cloud Run service that will be used to handle all Stackdriver notificatio
 
 ```shell
 gcloud beta run deploy sd-notif-handler \
-	--allow-unauthenticated \
-	--image gcr.io/cloudylabs-public/sd-notif-handler:0.1.1 \
-	--platform managed \
-	--timeout 15m \
-	--region us-central1 \
-	--set-env-vars "RELEASE=v0.1.1,TOPIC_NAME=stackdriver-notifications,NOTIF_TOKEN=${NOTIF_TOKEN}" \
-	--service-account "sd-notif-handler@${PROJECT}.iam.gserviceaccount.com"
+  --allow-unauthenticated \
+  --image gcr.io/cloudylabs-public/sd-notif-handler:0.1.1 \
+  --platform managed \
+  --timeout 15m \
+  --region us-central1 \
+  --set-env-vars "RELEASE=v0.1.1,TOPIC_NAME=stackdriver-notifications,NOTIF_TOKEN=${NOTIF_TOKEN}" \
+  --service-account "sd-notif-handler@${PROJECT}.iam.gserviceaccount.com"
 ```
 
 Once the service is created, we are also going to add a policy binding
@@ -136,9 +136,9 @@ echo "SERVICE_URL=${SERVICE_URL}"
 
 gcloud alpha monitoring channels create \
   --display-name sd-notif-handler-channel \
-	--channel-labels "url=${SERVICE_URL}/v1/notif?token=${NOTIF_TOKEN}" \
-	--type webhook_tokenauth \
-	--enabled
+  --channel-labels "url=${SERVICE_URL}/v1/notif?token=${NOTIF_TOKEN}" \
+  --type webhook_tokenauth \
+  --enabled
 ```
 
 ### Policy
@@ -188,9 +188,9 @@ export CHANNEL_ID=$(gcloud alpha monitoring channels list \
 	--format 'value("name")')
 
 gcloud alpha monitoring policies create \
-		--display-name sd-notif-handler-policy \
-		--notification-channels $CHANNEL_ID \
-		--policy-from-file PATH_TO_YOUR_POLICY_FILE.yaml
+  --display-name sd-notif-handler-policy \
+  --notification-channels $CHANNEL_ID \
+  --policy-from-file PATH_TO_YOUR_POLICY_FILE.yaml
 ```
 
 ## Cleanup
@@ -199,20 +199,20 @@ To cleanup all resources created by this sample execute
 
 ```shell
 export POLICY_ID=$(gcloud alpha monitoring policies list \
-	--filter "displayName='sd-notif-handler-policy'" \
-	--format 'value("name")')
+  --filter "displayName='sd-notif-handler-policy'" \
+  --format 'value("name")')
 gcloud alpha monitoring policies delete $POLICY_ID
 
 export CHANNEL_ID=$(gcloud alpha monitoring channels list \
-	--filter "displayName='sd-notif-handler-channel'" \
-	--format 'value("name")')
+  --filter "displayName='sd-notif-handler-channel'" \
+  --format 'value("name")')
 gcloud alpha monitoring channels delete $CHANNEL_ID
 
 gcloud pubsub subscriptions delete stackdriver-notifications
 
 gcloud beta run services delete sd-notif-handler \
-    --platform managed \
-    --region us-central1
+  --platform managed \
+  --region us-central1
 
 gcloud iam service-accounts delete \
   "sd-notif-handler@${PROJECT}.iam.gserviceaccount.com"
