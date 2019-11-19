@@ -1,14 +1,14 @@
-# Generic Stackdriver WebHook Handler implemented in Cloud Run
+# Generic Stackdriver WebHook Handler
 
-Simple Cloud Run service to handle all Stackdriver notifications and publish them to PubSub topic.
+Simple Cloud Run service to handle all Stackdriver notifications routed through the WebHook channel and publish them to PubSub topic for additional handlers.
 
-## What it does
+## What
 
-Creates Stackdriver channel (WebHook) which targets Cloud Run handler service. That service validates the token shared with WebHook to make sure the notifications are from valid source and relays all messages to a PubSub topic.
+Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler service. Creates one or more Alerting Policies in Stackdriver that will send notifications through the previously created channel. That Cloud Run service validates the token shared with WebHook to make sure the notifications are from a valid source, and then, relays these messages to a PubSub topic to be processed by additional handlers.
 
 ## Why
 
-Stackdriver has a limit of 16 notification channels that can be used for incidents. This service allows you to create only one WebHook and route all notifications to PubSub topic via Cloud Run service so you can create any number of Stackdriver policies that will trigger unlimited number of alerts. This way you can create multiple subscriptions to the notifications topic to handle these alerts.
+Stackdriver has a limit of 16 notification channels that can be used for incident notifications. This service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
 
 ## Notifications
 
