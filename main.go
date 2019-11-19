@@ -7,13 +7,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mchmarny/gcputil/env"
+	"github.com/mchmarny/gcputil/project"
 )
 
 var (
 	//service
-	logger  = log.New(os.Stdout, "", 0)
-	port    = env.MustGetEnvVar("PORT", "8080")
-	release = env.MustGetEnvVar("RELEASE", "v0.0.1-default")
+	logger      = log.New(os.Stdout, "", 0)
+	projectID   = project.GetIDOrFail()
+	port        = env.MustGetEnvVar("PORT", "8080")
+	release     = env.MustGetEnvVar("RELEASE", "v0.0.1-default")
+	accessToken = env.MustGetEnvVar("TOKEN", "")
+	topicName   = env.MustGetEnvVar("TOPIC", "")
 )
 
 func main() {
@@ -32,7 +36,7 @@ func main() {
 	// api
 	v1 := r.Group("/v1")
 	{
-		v1.POST("/print", printHandler)
+		v1.POST("/notif", notifHandler)
 	}
 
 	// server

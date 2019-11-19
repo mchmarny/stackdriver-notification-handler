@@ -1,4 +1,4 @@
-# Generic Stackdriver WebHook Handling Service
+# Stackdriver WebHook Handler in Cloud Run
 
 Simple Cloud Run service to process Stackdriver notifications. You can use it to create channel (WebHook) and define policies (see `policy/` for examples) to create threshold policies to invoke channel when reached.
 

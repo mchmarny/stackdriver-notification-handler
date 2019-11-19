@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+
+HAS_TOPIC=$(gcloud pubsub topics list \
+    --filter "name=projects/${PROJECT}/topics/${SERVICE_NAME}" \
+    --format "value(name)")
+
+if [ -z "$HAS_TOPIC" ]
+then
+    gcloud pubsub topics create $SERVICE_NAME
+fi

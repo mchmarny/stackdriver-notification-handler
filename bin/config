@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SERVICE - Cloud Run pump service
-SERVICE_NAME="stackdriver-webhook"
+SERVICE_NAME="stackdriver-notification"
 SERVICE_REGION="us-central1" # region to which service will be deployed
 SERVICE_IMAGE_VERSION="0.1.1" # gcr.io/cloudylabs-public/stackdriver-webhook:x
 NOTIF_TOKEN="${NOTIF_TOKEN:-test}" # Secured string which will be shared between trigger and service

@@ -1,8 +1,9 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,12 +21,33 @@ func defaultHandler(c *gin.Context) {
 	})
 }
 
-func printHandler(c *gin.Context) {
-	rd, e := httputil.DumpRequest(c.Request, true)
-	if e != nil {
-		logger.Printf("error dumping request: %v", e)
+func notifHandler(c *gin.Context) {
+	var data []byte
+	data, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		logger.Printf("error capturing notification: %v", err)
 	}
-	logger.Println(string(rd))
+	logger.Println(string(data))
+
+	// doing token after data for debugging
+	token := strings.TrimSpace(c.Query("token"))
+	if token != accessToken {
+		logger.Printf("invalid access token. Got:%s Want:%s", token, accessToken)
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid access token",
+			"status":  "Unauthorized",
+		})
+		return
+	}
+
+	if e := publish(c.Request.Context(), data); e != nil {
+		logger.Printf("error publishing notification: %v", e)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error handling notification",
+			"status":  "Failure",
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Notification proccessed",

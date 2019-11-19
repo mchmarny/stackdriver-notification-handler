@@ -14,4 +14,10 @@ gcloud beta run deploy $SERVICE_NAME \
 	--platform managed \
 	--timeout 15m \
 	--region $SERVICE_REGION \
-	--set-env-vars $CR_VAR
+	--set-env-vars $CR_VAR \
+	--service-account "${SERVICE_NAME}@${PROJECT}.iam.gserviceaccount.com"
+
+
+gcloud beta run services add-iam-policy-binding $SERVICE_NAME \
+    --member "serviceAccount:${SERVICE_NAME}@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/run.invoker
