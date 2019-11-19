@@ -2,6 +2,8 @@
 
 This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for example)
 
+![](image/diagram.png)
+
 ## What
 
 Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler service. Creates one or more Alerting Policies in Stackdriver that will send notifications through the previously created channel. That Cloud Run service validates the token shared with WebHook to make sure the notifications are from a valid source, and then, relays these messages to a PubSub topic to be processed by additional handlers.
