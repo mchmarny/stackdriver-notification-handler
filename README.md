@@ -1,6 +1,6 @@
 # Generic Stackdriver Alert WebHook Handler
 
-This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream.
+This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for example)
 
 ## What
 
