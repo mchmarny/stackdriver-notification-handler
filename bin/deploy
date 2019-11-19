@@ -1,0 +1,17 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+# Cloud Run Service Variables
+CR_VAR="RELEASE=v${SERVICE_IMAGE_VERSION}"
+CR_VAR+=",TOKEN=${NOTIF_TOKEN}"
+
+
+gcloud beta run deploy $SERVICE_NAME \
+	--allow-unauthenticated \
+	--image "gcr.io/cloudylabs-public/${SERVICE_NAME}:${SERVICE_IMAGE_VERSION}" \
+	--platform managed \
+	--timeout 15m \
+	--region $SERVICE_REGION \
+	--set-env-vars $CR_VAR

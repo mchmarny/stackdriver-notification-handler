@@ -1,0 +1,27 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+
+CHANNEL_ID=$(gcloud alpha monitoring channels list \
+	--filter "displayName='${SERVICE_NAME}-channel'" \
+	--format 'value("name")')
+
+if [ -z "$CHANNEL_ID" ]
+then
+  echo "abording, ${SERVICE_NAME}-channel not created"
+  exit 1
+fi
+
+POLICY_ID=$(gcloud alpha monitoring policies list \
+	--filter "displayName='${SERVICE_NAME}-policy'" \
+	--format 'value("name")')
+
+if [ -z "$POLICY_ID" ]
+then
+	gcloud alpha monitoring policies create \
+		--display-name "${SERVICE_NAME}-policy" \
+		--notification-channels $CHANNEL_ID \
+		--policy-from-file "./policy/vm-uptime.yaml"
+fi

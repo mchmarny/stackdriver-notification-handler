@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# SERVICE - Cloud Run pump service
+SERVICE_NAME="stackdriver-webhook"
+SERVICE_REGION="us-central1" # region to which service will be deployed
+SERVICE_IMAGE_VERSION="0.1.1" # gcr.io/cloudylabs-public/stackdriver-webhook:x
+NOTIF_TOKEN="${NOTIF_TOKEN:-test}" # Secured string which will be shared between trigger and service
+
+
+# DON'T CHANGE BELOW - Derived values
+PROJECT=$(gcloud config get-value project)
+PROJECT_NUM=$(gcloud projects describe ${PROJECT} \
+    --format="value(projectNumber)")

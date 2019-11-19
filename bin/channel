@@ -1,0 +1,34 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+SERVICE_URL=$(gcloud beta run services describe ${SERVICE_NAME} \
+    --region ${SERVICE_REGION} --format="value(status.domain)")
+echo "SERVICE_URL=${SERVICE_URL}"
+
+if [ -z "$SERVICE_URL" ]
+then
+	echo "abording, ${SERVICE_NAME} not deployed"
+    exit 1
+fi
+
+# channel
+
+CHANNEL_ID=$(gcloud alpha monitoring channels list \
+	--filter "displayName='${SERVICE_NAME}-channel'" \
+	--format 'value("name")')
+
+if [ -z "$CHANNEL_ID" ]
+then
+  gcloud alpha monitoring channels create \
+	--display-name "${SERVICE_NAME}-channel" \
+	--channel-labels "url=${SERVICE_URL}/v1/notif?token=${NOTIF_TOKEN}" \
+	--type webhook_tokenauth \
+	--enabled
+fi
+
+CHANNEL_ID=$(gcloud alpha monitoring channels list \
+	--filter "displayName='${SERVICE_NAME}-channel'" \
+	--format 'value("name")')
+echo "CHANNEL_ID=${CHANNEL_ID}"

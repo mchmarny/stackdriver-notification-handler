@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+# modules
+go mod tidy
+go mod vendor
+
+go run *.go

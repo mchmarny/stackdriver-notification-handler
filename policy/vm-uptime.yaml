@@ -1,0 +1,15 @@
+---
+combiner: OR
+conditions:
+- conditionThreshold:
+    aggregations:
+    - alignmentPeriod: 60s
+      perSeriesAligner: ALIGN_RATE
+    comparison: COMPARISON_GT
+    duration: 60s
+    filter: metric.type="compute.googleapis.com/instance/uptime" resource.type="gce_instance"
+    thresholdValue: 60
+    trigger:
+      count: 1
+  displayName: vm-uptime
+enabled: true

@@ -1,0 +1,15 @@
+---
+combiner: OR
+conditions:
+- conditionThreshold:
+    aggregations:
+    - alignmentPeriod: 60s
+      perSeriesAligner: ALIGN_RATE
+    comparison: COMPARISON_GT
+    duration: 60s
+    filter: metric.type="container.googleapis.com/container/uptime" resource.type="gke_container"
+    thresholdValue: 60
+    trigger:
+      count: 1
+  displayName: container-uptime
+enabled: true
