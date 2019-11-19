@@ -18,3 +18,10 @@ gcloud alpha monitoring channels delete $CHANNEL_ID -q
 gcloud beta run services delete $SERVICE_NAME \
     --platform managed \
     --region $SERVICE_REGION -q
+
+# PubSub
+gcloud pubsub subscriptions delete $SERVICE_NAME -q
+
+# IAM
+# gcloud iam service-accounts delete \
+#     "${SERVICE_NAME}@${PROJECT}.iam.gserviceaccount.com" -q
