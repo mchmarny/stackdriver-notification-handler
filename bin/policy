@@ -23,5 +23,5 @@ then
 	gcloud alpha monitoring policies create \
 		--display-name "${SERVICE_NAME}-policy" \
 		--notification-channels $CHANNEL_ID \
-		--policy-from-file "./policy/vm-uptime.yaml"
+		--policy-from-file "./policy/pubsub-message-age-or-num.yaml"
 fi
