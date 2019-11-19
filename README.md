@@ -1,6 +1,6 @@
 # Generic Stackdriver Alert WebHook Handler
 
-This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for example)
+This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for example below)
 
 ![](image/diagram.png)
 
@@ -10,9 +10,9 @@ Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler s
 
 ## Why
 
-Stackdriver alerting policies can capture many interesting events in GCP that currently do not have established event triggers.
+Stackdriver alerting policies can capture many interesting GCP events that are currently not available established event triggers in GCF.
 
-Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. To rather than creating individual WebHooks for each type alert you need, his service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
+Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. To rather than creating individual WebHooks for each alert type, this service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
 
 ## Notifications
 
