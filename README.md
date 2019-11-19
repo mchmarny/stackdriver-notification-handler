@@ -1,6 +1,6 @@
 # Generic Stackdriver WebHook Handler
 
-Simple Cloud Run service to handle all Stackdriver notifications routed through the WebHook channel and publish them to PubSub topic for additional handlers.
+This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream.
 
 ## What
 
@@ -8,11 +8,13 @@ Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler s
 
 ## Why
 
-Stackdriver has a limit of 16 notification channels that can be used for incident notifications. This service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
+Stackdriver alerting policies can capture many interesting events in GCP that currently do not have established event triggers.
+
+Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. To rather than creating individual WebHooks for each type alert you need, his service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
 
 ## Notifications
 
-The notification published to PubSub topic will differ in content depending the policy that triggered them (see [samples](https://cloud.google.com/monitoring/alerts/policies-in-json)) but generally they will look like this JSON message
+The notification published to PubSub topic will differ in content depending on the policy that triggered them (see [alert samples](https://cloud.google.com/monitoring/alerts/policies-in-json))). Here is an example of incident alert for metered resource (e.g. PubSub Topic)
 
 ```json
 {
@@ -22,9 +24,7 @@ The notification published to PubSub topic will differ in content depending the 
         "resource_name": "cloudylabs Cloud Pub/Sub Subscription labels {subscription_id=pubsub-to-bigquery-pump-sub}",
         "resource": {
             "type": "pubsub_subscription",
-            "labels": {
-                "subscription_id": "pubsub-to-bigquery-pump-sub"
-            }
+            "labels": { "subscription_id": "pubsub-to-bigquery-pump-sub" }
         },
         "started_at": 1573487005,
         "policy_name": "stackdriver-notifs-policy",
@@ -32,7 +32,7 @@ The notification published to PubSub topic will differ in content depending the 
         "url": "https://app.google.stackdriver.com/incidents/0.lekp2pr4h14z?project=cloudylabs",
         "state": "open",
         "ended_at": null,
-        "summary": "Unacked messages for cloudylabs Cloud Pub/Sub Subscription labels {subscription_id=pubsub-to-bigquery-pump-sub} is above the threshold of 100 with a value of 262.000."
+        "summary": "Unacked messages for Cloud Pub/Sub Subscription labels 'subscription_id=pubsub-to-bigquery-pump-sub' is above the threshold of 100 with a value of 262.000."
     },
     "version": "1.2"
 }
@@ -45,45 +45,100 @@ If you don't have one already, start by creating new project and configuring [Go
 
 ## Deployment
 
-> Optional: If you want to change the name and region of the deployed service review the [bin/config](bin/config) file
+### Configuration
 
-> To keep this readme short, I will be asking you to execute scripts. You should review these scripts before execution.
+To simplify the following commands we will first capture the project ID and notification token
+
+```shell
+export PROJECT=$(gcloud config get-value project)
+echo "Project: ${PROJECT}"
+export NOTIF_TOKEN=$(openssl rand -base64 32)
+echo "Project: ${Token}"
+```
 
 ### PubSub Topic
 
-Execute [bin/topic](bin/topic) script to create the topic where all notifications will be published
+Create the topic (`stackdriver-notifications`) where all notifications will be published
 
-```
-bin/topic
+```shell
+gcloud pubsub topics create stackdriver-notifications
 ```
 
 ## IAM Account
 
-Execute [bin/account](bin/account) script to create IAM account which will be used to run Cloud Run service. The created account will be granted only the necessary roles (`run.invoker`, `pubsub.publisher`, `logging.logWriter`, `monitoring.metricWriter`)
+Create IAM account (`sd-notif-handler`) which will be used to run Cloud Run service.
 
+```shell
+gcloud iam service-accounts create sd-notif-handler \
+  --display-name "stackdriver-notification cloud run service account"
 ```
-bin/account
+
+To allow this account to perform the necessary functions we are going to grant it a few roles
+
+```shell
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/run.invoker
+
+# TODO: `pubsub.publisher` should be sufficient
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/pubsub.editor
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/logging.logWriter
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/cloudtrace.agent
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+    --role roles/monitoring.metricWriter
 ```
 
 ## Cloud Run Service
 
-Execute the [bin/deploy](bin/deploy) script to create Cloud Run service that will be used to handle all Stackdriver notifications.
+Create Cloud Run service that will be used to handle all Stackdriver notifications.
 
-```
-bin/deploy
+```shell
+gcloud beta run deploy sd-notif-handler \
+	--allow-unauthenticated \
+	--image gcr.io/cloudylabs-public/sd-notif-handler:0.1.1 \
+	--platform managed \
+	--timeout 15m \
+	--region us-central1 \
+	--set-env-vars "RELEASE=v0.1.1,TOPIC_NAME=stackdriver-notifications,NOTIF_TOKEN=${NOTIF_TOKEN}" \
+	--service-account "sd-notif-handler@${PROJECT}.iam.gserviceaccount.com"
 ```
 
+Once the service is created, we are also going to add a policy binding
+
+```shell
+gcloud beta run services add-iam-policy-binding sd-notif-handler \
+  --member "serviceAccount:sd-notif-handler@${PROJECT}.iam.gserviceaccount.com" \
+  --role roles/run.invoker
+```
 
 ## Stackdriver
 
-To setup the Stackdriver side of this solution you will need to create Channel and at least one Policy.
+With the processing service ready, we can now define the Stackdriver channel and one or more policies.
 
 ### Channel
 
-Stackdriver supports WebHooks to notify remote services about incidents that occur. To set up this WebHooks channel execute the [bin/channel](bin/channel) script.
+Stackdriver supports WebHooks to notify remote services about incidents that occur. To set up this first create a WebHooks channel
 
-```
-bin/channel
+```shell
+export SERVICE_URL=$(gcloud beta run services describe sd-notif-handler \
+    --region us-central1 --format="value(status.domain)")
+echo "SERVICE_URL=${SERVICE_URL}"
+
+gcloud alpha monitoring channels create \
+  --display-name sd-notif-handler-channel \
+	--channel-labels "url=${SERVICE_URL}/v1/notif?token=${NOTIF_TOKEN}" \
+	--type webhook_tokenauth \
+	--enabled
 ```
 
 ### Policy
@@ -125,10 +180,17 @@ That policy will result in this in Stackdriver
 
 ![](image/policy.png)
 
-To create a policy you will need to exit the [bin/policy](bin/policy) script with the path of your policy file and then execute it.
+Once you have your policy file defined, you can create a policy and assign it to the above created channel
 
-```
-bin/policy
+```shell
+export CHANNEL_ID=$(gcloud alpha monitoring channels list \
+	--filter "displayName='sd-notif-handler-channel'" \
+	--format 'value("name")')
+
+gcloud alpha monitoring policies create \
+		--display-name sd-notif-handler-policy \
+		--notification-channels $CHANNEL_ID \
+		--policy-from-file PATH_TO_YOUR_POLICY_FILE.yaml
 ```
 
 ## Cleanup
@@ -136,7 +198,24 @@ bin/policy
 To cleanup all resources created by this sample execute
 
 ```shell
-bin/cleanup
+export POLICY_ID=$(gcloud alpha monitoring policies list \
+	--filter "displayName='sd-notif-handler-policy'" \
+	--format 'value("name")')
+gcloud alpha monitoring policies delete $POLICY_ID
+
+export CHANNEL_ID=$(gcloud alpha monitoring channels list \
+	--filter "displayName='sd-notif-handler-channel'" \
+	--format 'value("name")')
+gcloud alpha monitoring channels delete $CHANNEL_ID
+
+gcloud pubsub subscriptions delete stackdriver-notifications
+
+gcloud beta run services delete sd-notif-handler \
+    --platform managed \
+    --region us-central1
+
+gcloud iam service-accounts delete \
+  "sd-notif-handler@${PROJECT}.iam.gserviceaccount.com"
 ```
 
 ## Disclaimer

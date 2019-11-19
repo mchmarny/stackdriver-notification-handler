@@ -10,5 +10,3 @@ TOPIC_NAME="stackdriver-notifications"
 
 # DON'T CHANGE BELOW - Derived values
 PROJECT=$(gcloud config get-value project)
-PROJECT_NUM=$(gcloud projects describe ${PROJECT} \
-    --format="value(projectNumber)")
