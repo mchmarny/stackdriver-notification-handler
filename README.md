@@ -6,13 +6,13 @@ This simple Cloud Run service handles all Stackdriver notifications resulting fr
 
 ## What
 
-Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler service. Creates one or more Alerting Policies in Stackdriver that will send notifications through the previously created channel. That Cloud Run service validates the token shared with WebHook to make sure the notifications are from a valid source, and then, relays these messages to a PubSub topic to be processed by additional handlers.
+Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler service. Creates one or more Alerting Policies in Stackdriver that will send notifications through the previously created channel. That Cloud Run service validates the token shared with WebHook to make sure the notifications are from a valid source, and then relays these messages to a PubSub topic to be processed by additional handlers.
 
 ## Why
 
 Stackdriver alerting policies can capture many interesting GCP events that are currently not available established event triggers in GCF.
 
-Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. To rather than creating individual WebHooks for each alert type, this service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
+Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. Rather than creating individual WebHooks for each alert type, this service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
 
 ## Notifications
 
@@ -42,7 +42,7 @@ The notification published to PubSub topic will differ in content depending on t
 
 ## Prerequisites
 
-If you don't have one already, start by creating new project and configuring [Google Cloud SDK](https://cloud.google.com/sdk/docs/). Similarly, if you have not done so already, you will have [set up Cloud Run](https://cloud.google.com/run/docs/setup).
+If you don't have one already, start by creating a new project and configuring [Google Cloud SDK](https://cloud.google.com/sdk/docs/). Similarly, if you have not done so already, you will have [set up Cloud Run](https://cloud.google.com/run/docs/setup).
 
 
 ## Deployment
@@ -68,7 +68,7 @@ gcloud pubsub topics create stackdriver-notifications
 
 ## IAM Account
 
-Create IAM account (`sd-notif-handler`) which will be used to run Cloud Run service.
+Create an IAM account (`sd-notif-handler`) which will be used to run Cloud Run service.
 
 ```shell
 gcloud iam service-accounts create sd-notif-handler \
@@ -145,7 +145,7 @@ gcloud alpha monitoring channels create \
 
 ### Policy
 
-To monitor GCP and even AWS resources, you need to create alerting policies that when triggered, will use the above created channel (WebHook) to send notifications to Cloud Run. In the [policy/](policy/) directory you will find a few sample policies. Here is an example of policy monitoring PubSub topic for un acknowledged messages (age or number)
+To monitor GCP and even AWS resources, you need to create alerting policies that when triggered, will use the above created channel (WebHook) to send notifications to Cloud Run. In the [policy/](policy/) directory you will find a few sample policies. Here is an example of policy monitoring PubSub topic for un unacknowledged messages (age or number)
 
 ```yaml
 ---
