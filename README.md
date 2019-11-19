@@ -123,7 +123,7 @@ enabled: true
 
 That policy will result in this in Stackdriver
 
-![](images/policy.png)
+![](image/policy.png)
 
 To create a policy you will need to exit the [bin/policy](bin/policy) script with the path of your policy file and then execute it.
 
