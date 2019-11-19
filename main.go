@@ -16,8 +16,8 @@ var (
 	projectID   = project.GetIDOrFail()
 	port        = env.MustGetEnvVar("PORT", "8080")
 	release     = env.MustGetEnvVar("RELEASE", "v0.0.1-default")
-	accessToken = env.MustGetEnvVar("TOKEN", "")
-	topicName   = env.MustGetEnvVar("TOPIC", "")
+	accessToken = env.MustGetEnvVar("NOTIF_TOKEN", "")
+	topicName   = env.MustGetEnvVar("TOPIC_NAME", "")
 )
 
 func main() {

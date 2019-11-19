@@ -5,6 +5,7 @@ SERVICE_NAME="sd-notif-handler"
 SERVICE_REGION="us-central1" # region to which service will be deployed
 SERVICE_IMAGE_VERSION="0.1.1" # gcr.io/cloudylabs-public/stackdriver-notification-handler:x
 NOTIF_TOKEN="${NOTIF_TOKEN:-test}" # Secured string which will be shared between trigger and service
+TOPIC_NAME="stackdriver-notifications"
 
 
 # DON'T CHANGE BELOW - Derived values

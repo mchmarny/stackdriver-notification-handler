@@ -5,10 +5,10 @@ DIR="$(dirname "$0")"
 
 
 HAS_TOPIC=$(gcloud pubsub topics list \
-    --filter "name=projects/${PROJECT}/topics/${SERVICE_NAME}" \
+    --filter "name=projects/${PROJECT}/topics/${TOPIC_NAME}" \
     --format "value(name)")
 
 if [ -z "$HAS_TOPIC" ]
 then
-    gcloud pubsub topics create $SERVICE_NAME
+    gcloud pubsub topics create $TOPIC_NAME
 fi

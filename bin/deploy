@@ -5,7 +5,8 @@ DIR="$(dirname "$0")"
 
 # Cloud Run Service Variables
 CR_VAR="RELEASE=v${SERVICE_IMAGE_VERSION}"
-CR_VAR+=",TOKEN=${NOTIF_TOKEN}"
+CR_VAR+=",NOTIF_TOKEN=${NOTIF_TOKEN}"
+CR_VAR+=",TOPIC_NAME=${TOPIC_NAME}"
 
 
 gcloud beta run deploy $SERVICE_NAME \

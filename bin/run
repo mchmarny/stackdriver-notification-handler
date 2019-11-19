@@ -3,6 +3,9 @@
 DIR="$(dirname "$0")"
 . "${DIR}/config"
 
+export NOTIF_TOKEN=$NOTIF_TOKEN
+export TOPIC_NAME=$TOPIC_NAME
+
 # modules
 go mod tidy
 go mod vendor
