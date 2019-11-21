@@ -15,7 +15,7 @@ Single Stackdriver channel (WebHook) which targets single Cloud Run service able
 
 ## Notifications
 
-The notification published to PubSub topic will differ in content depending on the policy that triggered them (see [alert samples](https://cloud.google.com/monitoring/alerts/policies-in-json))). Here is an example of incident alert for metered resource (e.g. PubSub Topic)
+The notification published to PubSub topic will differ in content depending on the type of policy that triggered them (see [alert samples](https://cloud.google.com/monitoring/alerts/policies-in-json)). Here is an example of incident alert for metered resource (e.g. PubSub Topic).
 
 ```json
 {
