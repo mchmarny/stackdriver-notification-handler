@@ -1,18 +1,17 @@
 # Generic Stackdriver Alert WebHook Handler
 
-This simple Cloud Run service handles all Stackdriver notifications resulting from alerting policies and publishes them to PubSub topic for additional handlers to process them downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for example below)
+This simple Cloud Run service handles Stackdriver notifications triggered by alerting policies and publishes them to Cloud PubSub topic for additional handlers to process downstream (see [pubsub-to-bigquery-pump](https://github.com/mchmarny/pubsub-to-bigquery-pump) for real-world example of how this service can be used)
 
 ![](image/diagram.png)
 
 ## What
 
-Creates a single Stackdriver channel (WebHook) which targets Cloud Run handler service. Creates one or more Alerting Policies in Stackdriver that will send notifications through the previously created channel. That Cloud Run service validates the token shared with WebHook to make sure the notifications are from a valid source, and then relays these messages to a PubSub topic to be processed by additional handlers.
+Single Stackdriver channel (WebHook) which targets single Cloud Run service able to handle one or more Stackdriver Alerting Policies. This service also validates the WebHook token to make sure the notification is from a valid source, and then relays that messages to a PubSub.
 
 ## Why
 
-Stackdriver alerting policies can capture many interesting GCP events that are currently not available established event triggers in GCF.
-
-Stackdriver has also a limit of 16 notification channels that can be used for incident notifications. Rather than creating individual WebHooks for each alert type, this service allows you to create a single WebHook and route all policy created notifications to a PubSub topic so you can create any number of Stackdriver policies that will trigger unlimited number of alerts.
+1. **Unique event triggers** - Stackdriver can be configured with multiple alerting policies to capture many GCP events that are currently not available through other means
+2. **Works around channel limits** - Stackdriver has a limit of 16 notification channels. This service allows you to create a single channel and route any number of alerting policies though this channel to PubSub where you can use GCF or Cloud Run to process these events. 
 
 ## Notifications
 
