@@ -54,7 +54,7 @@ To simplify the following commands we will first capture the project ID and noti
 export PROJECT=$(gcloud config get-value project)
 echo "Project: ${PROJECT}"
 export NOTIF_TOKEN=$(openssl rand -base64 32)
-echo "Project: ${Token}"
+echo "Token: ${NOTIF_TOKEN}"
 ```
 
 ### PubSub Topic
