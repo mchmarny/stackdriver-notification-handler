@@ -132,7 +132,7 @@ Stackdriver supports WebHooks to notify remote services about incidents that occ
 
 ```shell
 export SERVICE_URL=$(gcloud beta run services describe sd-notif-handler \
-  --region us-central1 --format="value(status.domain)")
+  --region us-central1 --format="value(status.url)")
 echo "SERVICE_URL=${SERVICE_URL}"
 
 gcloud alpha monitoring channels create \
